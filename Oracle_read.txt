@@ -1,0 +1,101 @@
+package com.example.amhi.amhi.domain;
+
+
+import oracle.xdb.XMLType;
+
+import java.sql.*;
+
+public class OracleRead {
+
+//    public static void main(String[] args) {
+//        OracleRead read = new OracleRead();
+//       read.getWebsiteConnection("WP3990651P");
+////        read.getWebsiteConnection("WPNU2M18FP");
+//    }
+
+    // Website DB Connection
+
+    public String getWebsiteConnection(String pf){
+
+        String str = "";
+
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+//            String DB_URL="Oracle_DB_URl";
+            Connection conn = DriverManager.getConnection
+                    ("DB_Connection_URL", "username", "password");
+            Statement stmt = conn.createStatement();
+
+            System.out.println("Connected");
+
+            ResultSet rs = stmt.executeQuery("select request from Table_Name where requestfor like '%"+pf+"%'");
+
+            if(!rs.isBeforeFirst()){
+                conn.close();
+                System.out.println("resultset contin no rows");
+                str= "not found";
+                return str;
+            }
+            while (rs.next()){
+
+                System.out.println("$######################");
+                XMLType xml = (XMLType) rs.getObject(1);
+
+                System.out.println(xml.getStringVal());
+                str = xml.getStringVal();
+
+            }
+
+            conn.close();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e);
+
+        }
+        return str;
+    }
+
+
+    // Elixir DB connection
+
+    public  String getElixirConnection(String pf){
+        String str = "";
+        try {
+            System.out.println("Inside Db");
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+//            String DB_URL="DB_URL";
+            Connection conn = DriverManager.getConnection
+                    ("DB_Url", "username", "Password");
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("select strxmlobj from Table_Name where strpropnbr='" + pf +"'and  strservicetype='ProposalCreation' and strreqorres='Request'");
+
+
+
+            if(!rs.isBeforeFirst()){
+                conn.close();
+                System.out.println("resultset contin no rows");
+                str= "not found";
+                return str;
+            }
+
+            while (rs.next()){
+                Blob blob = rs.getBlob(1);
+                byte[] bdata = blob.getBytes(1, (int) blob.length());
+                String s = new String(bdata);
+                str = s;
+                System.out.println(s);
+            }
+
+            conn.close();
+        } catch (Exception e) {
+            System.out.println(e);
+            return str;
+        }
+        return str;
+
+    }
+
+
+}
